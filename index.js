@@ -51,6 +51,18 @@ async function run() {
       res.json(result);
     });
 
+    // Edit ba update korar api
+    app.patch("/idea/:id", async(req, res) => {
+      const { id } = req.params;
+      const updatedData = req.body;
+      const result = await ideaCollection.updateOne(
+        {_id: new ObjectId(id)},
+        {$set: updatedData}
+      );
+      res.json(result)
+    });
+
+
     // Comment ADD Korar API
     app.post("/comments", async (req, res) => {
       try {
