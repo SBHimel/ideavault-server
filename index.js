@@ -1,7 +1,7 @@
 const express = require('express')
 const dontenv = require('dotenv')
 const cors = require("cors");
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 dontenv.config()
 const uri = process.env.MONGODB_URI;
 
@@ -36,10 +36,18 @@ async function run() {
     });
 
     // mongodb theke data ana and ideas page e dekhanu
-
     app.get('/idea', async(req, res)=>{
       const result = await ideaCollection.find().toArray();
       
+      res.json(result)
+    });
+
+    // IdeaDetailsPage id onujayi get kora
+    app.get("/idea/:id", async(req, res) =>{
+      const {id} = req.params
+
+      const result = await ideaCollection.findOne({_id: new ObjectId(id)})
+
       res.json(result)
     })
 
