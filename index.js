@@ -52,16 +52,29 @@ async function run() {
     });
 
     // Edit ba update korar api
-    app.patch("/idea/:id", async(req, res) => {
+    app.patch("/idea/:id", async (req, res) => {
       const { id } = req.params;
       const updatedData = req.body;
       const result = await ideaCollection.updateOne(
-        {_id: new ObjectId(id)},
-        {$set: updatedData}
+        { _id: new ObjectId(id) },
+        { $set: updatedData },
       );
-      res.json(result)
+      res.json(result);
     });
 
+    // Delete idea==================
+    // Delete idea API
+    app.delete("/idea/:id", async (req, res) => {
+      try {
+        const { id } = req.params;
+        const result = await ideaCollection.deleteOne({
+          _id: new ObjectId(id),
+        });
+        res.json(result); 
+      } catch (error) {
+        res.status(500).send({ message: "Failed to delete idea", error });
+      }
+    });
 
     // Comment ADD Korar API
     app.post("/comments", async (req, res) => {
@@ -125,8 +138,6 @@ async function run() {
         res.status(500).send({ message: "Error deleting comment", error });
       }
     });
-
-    
 
     await client.db("admin").command({ ping: 1 });
     console.log(
