@@ -22,7 +22,7 @@ const client = new MongoClient(uri, {
 
 // jwks key set
 const JWKS = createRemoteJWKSet(
-  new URL ("http://localhost:3000/api/auth/jwks")
+  new URL (`${process.env.CLIENT_URL}/api/auth/jwks`)
 )
 
 
@@ -54,7 +54,7 @@ const verifyToken = async (req, res, next) => {
 
 async function run() {
   try {
-    await client.connect();
+    // await client.connect();
 
     const db = client.db("ideaVault");
     const ideaCollection = db.collection("ideas");
@@ -133,26 +133,39 @@ async function run() {
         res.status(500).send({ message: "Error adding comment", error });
       }
     });
-    // নির্দিষ্ট ইউজারের করা সব কমেন্ট GET করার API (my-interactions এর জন্য)
-    app.get("/user-comments",verifyToken, async (req, res) => {
+   // 🎯 নির্দিষ্ট ইউজারের করা সব কমেন্ট GET করার API (অন্যান্য রুট অক্ষত রেখে)
+    app.get("/user-comments", verifyToken, async (req, res) => {
       try {
-        let query = {};
+        // 🔒 যেহেতু req.user মাঝপথে undefined হচ্ছে, তাই আমরা সরাসরি 
+        // হেডার্স থেকে টোকেনটা আবার ডিকোড করে নিচ্ছি শুধু এই রুটের জন্য!
+        const authHeader = req.headers.authorization;
+        const token = authHeader.split(" ")[1];
+        
+        // 🚀 এখানে সরাসরি jose লাইব্রেরি দিয়ে আবার ডিকোড করা হলো
+        const { payload } = await jwtVerify(token, JWKS);
+        const verifiedEmail = payload?.email; 
 
-        // ফ্রন্টএন্ড থেকে ইমেইল পাঠানো হলে (যেমন: /user-comments?email=user@gmail.com)
-        if (req.query.email) {
-          query = { userEmail: req.query.email };
+        if (!verifiedEmail) {
+          console.log("❌ এই টোকেনে কোনো ইমেইল পাওয়া যায়নি!");
+          return res.json([]); 
         }
 
+        console.log("🔍 আপনার অন্য কোনো রুট না ভেঙে এই ইমেইল দিয়ে কমেন্ট খোঁজা হচ্ছে:", verifiedEmail);
+
+        const query = { userEmail: verifiedEmail }; 
+        
         const result = await commentCollection
           .find(query)
-          .sort({ _id: -1 }) // new comment age dekhabe tai emn
+          .sort({ _id: -1 })
           .toArray();
 
-        res.send(result);
+        console.log(`📊 ডাটাবেজ থেকে মোট ${result.length} টি কমেন্ট পাওয়া গেছে।`);
+
+        res.json(result); 
+        
       } catch (error) {
-        res
-          .status(500)
-          .send({ message: "Error fetching user comments", error });
+        console.error("❌ Database or Token error in user-comments:", error);
+        res.json([]); 
       }
     });
 
@@ -207,7 +220,7 @@ async function run() {
       }
     });
 
-    await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!",
     );
