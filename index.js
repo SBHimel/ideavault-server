@@ -37,11 +37,20 @@ async function run() {
 
     // mongodb theke data ana and ideas page e dekhanu
     app.get("/idea", async (req, res) => {
-      const result = await ideaCollection.find().toArray();
+      try {
+        let query = {};
+        
+        // যদি ফ্রন্টএন্ড থেকে কুয়েরিতে ইমেইল পাঠানো হয় (যেমন: /idea?email=himel@gmail.com)
+        if (req.query.email) {
+          query = { userEmail: req.query.email };
+        }
 
-      res.json(result);
+        const result = await ideaCollection.find(query).toArray();
+        res.json(result);
+      } catch (error) {
+        res.status(500).send({ message: "Failed to fetch ideas", error });
+      }
     });
-
     // IdeaDetailsPage id onujayi get kora
     app.get("/idea/:id", async (req, res) => {
       const { id } = req.params;
