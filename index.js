@@ -86,6 +86,7 @@ async function run() {
       }
     });
 
+
     // IdeaDetailsPage id onujayi get kora
     app.get("/idea/:id",verifyToken, async (req, res) => {
       const { id } = req.params;
@@ -120,7 +121,7 @@ async function run() {
       }
     });
 
-    // Comment ADD Korar API
+    // Comment ADD Korar API bananu
     app.post("/comments",verifyToken, async (req, res) => {
       try {
         const commentData = req.body;
