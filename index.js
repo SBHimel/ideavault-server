@@ -69,14 +69,25 @@ async function run() {
       res.json(result);
     });
 
-    // mongodb theke data ana and ideas page e dekhanu
+   // mongodb theke data ana and ideas page e dekhanu
     app.get("/idea", async (req, res) => {
       try {
         let query = {};
 
-        // যদি ফ্রন্টএন্ড থেকে কুয়েরিতে ইমেইল পাঠানো হয় (যেমন: /idea?email=himel@gmail.com)
+        // ১. আপনার আগের ইমেইল ফিল্টার (যা ছিল)
         if (req.query.email) {
-          query = { userEmail: req.query.email };
+          query.userEmail = req.query.email;
+        }
+
+        // 🔍 ২. সার্চ লজিক (MongoClient এর জন্য একদম সঠিক ফরম্যাট)
+        if (req.query.search) {
+          // এটি টাইটেলের ভেতর কেস-ইনসেনসিটিভ সার্চ করবে
+          query.title = { $regex: new RegExp(req.query.search, 'i') };
+        }
+
+        // 📂 ৩. ক্যাটাগরি ফিল্টার লজিক
+        if (req.query.category) {
+          query.category = req.query.category;
         }
 
         const result = await ideaCollection.find(query).toArray();
