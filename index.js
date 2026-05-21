@@ -133,7 +133,7 @@ async function run() {
         res.status(500).send({ message: "Error adding comment", error });
       }
     });
-   // 🎯 নির্দিষ্ট ইউজারের করা সব কমেন্ট GET করার API (অন্যান্য রুট অক্ষত রেখে)
+   // নির্দিষ্ট ইউজারের করা সব কমেন্ট GET করার API (অন্যান্য রুট অক্ষত রেখে)
     app.get("/user-comments", verifyToken, async (req, res) => {
       try {
         // 🔒 যেহেতু req.user মাঝপথে undefined হচ্ছে, তাই আমরা সরাসরি 
@@ -146,7 +146,7 @@ async function run() {
         const verifiedEmail = payload?.email; 
 
         if (!verifiedEmail) {
-          console.log("❌ এই টোকেনে কোনো ইমেইল পাওয়া যায়নি!");
+          console.log(" এই টোকেনে কোনো ইমেইল পাওয়া যায়নি!");
           return res.json([]); 
         }
 
@@ -159,12 +159,12 @@ async function run() {
           .sort({ _id: -1 })
           .toArray();
 
-        console.log(`📊 ডাটাবেজ থেকে মোট ${result.length} টি কমেন্ট পাওয়া গেছে।`);
+        console.log(` ডাটাবেজ থেকে মোট ${result.length} টি কমেন্ট পাওয়া গেছে।`);
 
         res.json(result); 
         
       } catch (error) {
-        console.error("❌ Database or Token error in user-comments:", error);
+        console.error(" Database or Token error in user-comments:", error);
         res.json([]); 
       }
     });
