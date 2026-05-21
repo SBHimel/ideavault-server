@@ -74,18 +74,18 @@ async function run() {
       try {
         let query = {};
 
-        // ১. আপনার আগের ইমেইল ফিল্টার (যা ছিল)
+        
         if (req.query.email) {
           query.userEmail = req.query.email;
         }
 
-        // 🔍 ২. সার্চ লজিক (MongoClient এর জন্য একদম সঠিক ফরম্যাট)
+        //  search er logic
         if (req.query.search) {
           // এটি টাইটেলের ভেতর কেস-ইনসেনসিটিভ সার্চ করবে
           query.title = { $regex: new RegExp(req.query.search, 'i') };
         }
 
-        // 📂 ৩. ক্যাটাগরি ফিল্টার লজিক
+        //   cetagory logic
         if (req.query.category) {
           query.category = req.query.category;
         }
@@ -147,12 +147,11 @@ async function run() {
    // নির্দিষ্ট ইউজারের করা সব কমেন্ট GET করার API (অন্যান্য রুট অক্ষত রেখে)
     app.get("/user-comments", verifyToken, async (req, res) => {
       try {
-        // 🔒 যেহেতু req.user মাঝপথে undefined হচ্ছে, তাই আমরা সরাসরি 
-        // হেডার্স থেকে টোকেনটা আবার ডিকোড করে নিচ্ছি শুধু এই রুটের জন্য!
+       
         const authHeader = req.headers.authorization;
         const token = authHeader.split(" ")[1];
         
-        // 🚀 এখানে সরাসরি jose লাইব্রেরি দিয়ে আবার ডিকোড করা হলো
+        
         const { payload } = await jwtVerify(token, JWKS);
         const verifiedEmail = payload?.email; 
 
@@ -161,7 +160,7 @@ async function run() {
           return res.json([]); 
         }
 
-        console.log("🔍 আপনার অন্য কোনো রুট না ভেঙে এই ইমেইল দিয়ে কমেন্ট খোঁজা হচ্ছে:", verifiedEmail);
+        console.log(" email khuja", verifiedEmail);
 
         const query = { userEmail: verifiedEmail }; 
         
